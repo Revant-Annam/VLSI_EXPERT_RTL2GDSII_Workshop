@@ -209,3 +209,35 @@ Of course. Here are the key commands from the `run_dc.tcl` script and their sign
 
 ### **`write -format verilog ...`**
 **Significance**: This command **saves the final output files**. Most importantly, it writes the **gate-level Verilog netlist**, which is the primary output of the synthesis stage and the input for the next stage, Place and Route.
+
+You are absolutely right. My apologies for missing those specific commands in your file. Here is the complete breakdown of every command in your `run_dc.tcl`, including the ones I didn't mention before.
+
+***
+
+### New Commands Not Previously Mentioned
+
+#### **`define_design_lib WORK -path ./WORK`**
+**Significance**: This command creates a design library named **`WORK`**. 📚 This is the standard "working" library where Design Compiler stores the intermediate, analyzed versions of your Verilog files before they are fully synthesized. The `-path ./WORK` part tells DC to create a directory named `WORK` in your current location to store these files.
+
+#### **`current_design`**
+**Significance**: After you `elaborate` your design, it exists in the tool's memory. This command officially **sets that elaborated design as the active target** for all subsequent commands. 🎯 It's like telling DC, "Okay, all the `compile` and `report` commands I'm about to run? Apply them to the `full_adder` design."
+
+#### **`compile`**
+**Significance**: Your script contains both `#compile` and `compile_ultra`. `compile` is the standard, medium-effort synthesis command. `compile_ultra` is the high-effort, more advanced version that generally gives better Quality of Results (QoR). In your script, `#compile` is **commented out**, meaning only the more powerful `compile_ultra` is actually being executed.
+
+***
+
+### Additional Details on Previously Mentioned Commands
+
+#### **`#set_dont_use ...`**
+**Significance**: It's crucial to note that in your script, all the `set_dont_use` lines are **commented out** with a `#`. This means they are **inactive**. As a result, Design Compiler is currently **allowed** to use any cells it wants from the library, including complex, pre-built cells like full adders (`FADD`) or multiplexers (`MUX`). If these lines were active, DC would be forced to build these functions from more basic gates.
+
+#### **`source -echo -verbose ...`**
+**Significance**: Your `source` command has two helpful flags for debugging:
+* **`-echo`**: Prints each command from the sourced script to the terminal before it runs.
+* **`-verbose`**: Provides more detailed log messages while the script is being sourced.
+
+#### **`write -format verilog -hierarchy -output ...`**
+**Significance**: Your `write` command includes:
+* **`-hierarchy`**: This flag ensures that the entire design hierarchy is preserved and written out in the final netlist.
+* **`-output`**: This explicitly specifies the output filename and path.
