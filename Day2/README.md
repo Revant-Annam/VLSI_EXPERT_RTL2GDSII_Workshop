@@ -171,3 +171,41 @@ This report gives a detailed breakdown of the physical size of your design, usua
 ### Conclusion
 
 On Day 2, **Synopsys Design Compiler (DC)** was used to perform logic synthesis on the `full_adder` RTL. The process, automated by a robust and modular Tcl scripting flow, successfully translated the behavioral Verilog code into a technology-specific, optimized gate-level netlist. Analysis of the timing and area reports confirms the quality of the synthesized circuit. This gate-level netlist is the final product of the front-end design phase and serves as the direct input for the back-end **Place and Route (P\&R)** stage.
+
+Of course. Here are the key commands from the `run_dc.tcl` script and their significance.
+
+## Configuration and Setup
+
+### **`source ../rm_setup/dc_setup.tcl`**
+**Significance**: This command **loads the entire configuration environment**. It's like loading a settings profile before starting a game. It tells Design Compiler where to find all the necessary files, such as technology libraries, and how to name the output files. Without this, the tool wouldn't know what building blocks (standard cells) it can use.
+
+***
+
+## Design Input and Constraints
+
+### **`set RTL_SOURCE_FILES ../rtl/full_adder.v`**
+**Significance**: This sets a variable to point to your **RTL source code**. It tells the tool which design file to work on.
+
+### **`analyze` and `elaborate`**
+**Significance**: These commands **read and understand your RTL code**. `analyze` checks the Verilog for syntax errors, and `elaborate` builds the design in memory, creating a technology-independent, generic logic structure.
+
+### **`set_dont_use [get_lib_cells */FADD*]`**
+**Significance**: This is a **synthesis directive** that acts as a negative constraint. You are explicitly telling the tool, "Do not use any pre-built full-adder cells from the library." This forces DC to build the adder from more fundamental gates (`AND`, `XOR`, etc.), which is essential for this kind of synthesis exercise.
+
+### **`read_sdc ../CONSTRAINTS/full_adder.sdc`**
+**Significance**: This command reads the **Synopsys Design Constraints (SDC) file**. 📜 This is one of the most important inputs. The SDC file contains the **timing goals** for the design, most importantly the clock period. The entire optimization process is driven by the need to meet these constraints.
+
+***
+
+## Synthesis and Output
+
+### **`compile_ultra`**
+**Significance**: This is the **heart of the synthesis process** ❤️‍🔥. It's a powerful command that performs two main jobs:
+1.  **Mapping**: It replaces the generic logic with specific, physical standard cells from the technology library.
+2.  **Optimization**: It intelligently restructures the circuit to meet the timing goals from the SDC file, while also trying to minimize the circuit's area and power consumption.
+
+### **`report_timing` / `report_area` / `report_qor`**
+**Significance**: These commands **generate the analysis reports**. They don't change the design, but they give you the critical feedback needed to judge the quality of the synthesis run (the Quality of Results, or QoR).
+
+### **`write -format verilog ...`**
+**Significance**: This command **saves the final output files**. Most importantly, it writes the **gate-level Verilog netlist**, which is the primary output of the synthesis stage and the input for the next stage, Place and Route.
